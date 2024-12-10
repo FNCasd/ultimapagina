@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Santarelli limpia</title>
+  <!-- Vincula Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body, html {
+      margin: 0;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .content {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    canvas {
+      width: 800px;  
+      height: 600px; 
+      border: 1px solid #000; 
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#">Ultima Pagina</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+          <li class="nav-item">
+            <a class="nav-link" href="index.html">Inicio</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="pagina1.html">Contador</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="pagina2.html">GD trucho</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href="pagina3.html">Santarelli limpia</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="pagina4.html">Página 4</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="content">
+    <canvas id="Canvas"></canvas>
+  </div>
+  <footer class="bg-dark text-white text-center py-4">
+    <p>&copy; 2024 Ultima Pagina. Todos los derechos reservados.</p>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    const canvas = document.getElementById('Canvas');
+    const ctx = canvas.getContext('2d');
+
+    canvas.width = 800;  
+    canvas.height = 600;
+
+    const fondo = new Image();
+    fondo.src = 'arroyo.jfif';
+
+    const jugador = new Image();
+    jugador.src = 'jugador.jfif';
+
+    const basuraImg = new Image();
+    basuraImg.src = 'basura.jfif';
+
+    let x = 50;
+    let y = 50;
+    const tamaño = 50;
+    const velocidad = 5;
+    const basuras = [];
+    let puntos = 0;
+
+    const teclasPresionadas = {};
+
+    function crearBasuraAleatoria() {
+      const tamañoAleatorio = 70;
+      const nuevaBasura = {
+        x: Math.random() * (canvas.width - tamañoAleatorio),
+        y: Math.random() * (canvas.height - tamañoAleatorio),
+        tamaño: tamañoAleatorio
+      };
+      basuras.push(nuevaBasura);
+    }
+
+    function dibujarBasura(basura) {
+      ctx.drawImage(basuraImg, basura.x, basura.y, basura.tamaño, basura.tamaño);
+    }
+
+    function dibujarJugador() {
+      ctx.drawImage(jugador, x, y, tamaño, tamaño);
+    }
+
+    function dibujarFondo() {
+      ctx.drawImage(fondo, 0, 0, canvas.width, canvas.height);
+    }
+
+    function dibujarContador() {
+      ctx.fillStyle = 'red';
+      ctx.font = '30px Arial';
+      ctx.textAlign = 'center';
+      ctx.fillText(`Puntos: ${puntos}`, canvas.width / 2, 40);
+    }
+
+    function colision(basura) {
+      return x < basura.x + basura.tamaño &&
+             x + tamaño > basura.x &&
+             y < basura.y + basura.tamaño &&
+             y + tamaño > basura.y;
+    }
+
+    function moverJugador() {
+      if (teclasPresionadas['w'] && y > 0) y -= velocidad;
+      if (teclasPresionadas['a'] && x > 0) x -= velocidad;
+      if (teclasPresionadas['s'] && y < canvas.height - tamaño) y += velocidad;
+      if (teclasPresionadas['d'] && x < canvas.width - tamaño) x += velocidad;
+
+      for (let i = basuras.length - 1; i >= 0; i--) {
+        if (colision(basuras[i])) {
+          basuras.splice(i, 1);
+          puntos++;
+        }
+      }
+
+      dibujarFondo();
+      dibujarJugador();
+      basuras.forEach(dibujarBasura);
+      dibujarContador();
+      requestAnimationFrame(moverJugador);
+    }
+
+    window.addEventListener('keydown', (event) => {
+      teclasPresionadas[event.key] = true;
+    });
+
+    window.addEventListener('keyup', (event) => {
+      teclasPresionadas[event.key] = false;
+    });
+
+    setInterval(crearBasuraAleatoria, 2000);
+
+    let imagesLoaded = 0;
+    const totalImages = 3;
+
+    fondo.onload = jugador.onload = basuraImg.onload = () => {
+      imagesLoaded++;
+      if (imagesLoaded === totalImages) {
+        moverJugador();
+      }
+    };
+
+    window.onload = () => {
+      alert("¡Hola! Bienvenido a VGB Reciclar.");
+      alert("En este juego deberas hacer que el intendente Oscar Santerelli junte la basura del arroyo! Usa WASD para moverte");
+    };
+  </script>
+</body>
+</html>
